@@ -92,7 +92,7 @@ weather_df %>%
   ggplot(aes(x = tmin, y = tmax, color = name)) +
   geom_point(alpha = 0.3) + # make it transparent
   geom_smooth(se = FALSE) + # add fitted line
-  facet_grid(. ~ name)
+  facet_grid(. ~ name) # seperate graphs
 ```
 
     ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
@@ -102,3 +102,62 @@ weather_df %>%
     ## Warning: Removed 15 rows containing missing values (geom_point).
 
 ![](viz_part1_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+Let’s make one more scatterplot.
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, size = prcp)) + # change dot size
+  geom_point(alpha = .3) +
+  facet_grid(. ~ name)+
+  geom_smooth(se = FALSE)
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_smooth).
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+![](viz_part1_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+## use data manipulation as part of this
+
+``` r
+weather_df %>% 
+  filter(name == "CentralPark_NY") %>% 
+  mutate(
+    tmax = tmax * (9/5) + 32,
+    tmin = tmin * (9/5) + 32 # convert C to F
+  ) %>% 
+  ggplot(aes(x = date, y = tmax)) +
+  geom_point()
+```
+
+![](viz_part1_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+## stacking geoms
+
+Which geoms do you want?
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_smooth() 
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_smooth).
+
+![](viz_part1_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_bin_2d() 
+```
+
+    ## Warning: Removed 15 rows containing non-finite values (stat_bin2d).
+
+![](viz_part1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->

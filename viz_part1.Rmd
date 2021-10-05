@@ -59,8 +59,58 @@ weather_df %>%
   ggplot(aes(x = tmin, y = tmax, color = name)) +
   geom_point(alpha = 0.3) + # make it transparent
   geom_smooth(se = FALSE) + # add fitted line
-  facet_grid(. ~ name)
+  facet_grid(. ~ name) # seperate graphs
 ```
+
+Let's make one more scatterplot.
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, size = prcp)) + # change dot size
+  geom_point(alpha = .3) +
+  facet_grid(. ~ name)+
+  geom_smooth(se = FALSE)
+
+```
+
+## use data manipulation as part of this
+
+```{r}
+weather_df %>% 
+  filter(name == "CentralPark_NY") %>% 
+  mutate(
+    tmax = tmax * (9/5) + 32,
+    tmin = tmin * (9/5) + 32 # convert C to F
+  ) %>% 
+  ggplot(aes(x = date, y = tmax)) +
+  geom_point()
+
+```
+
+
+## stacking geoms
+
+Which geoms do you want?
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_smooth() 
+  
+```
+
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_bin_2d() 
+```
+
+
+
+
+
+
 
 
 
