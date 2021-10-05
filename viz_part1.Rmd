@@ -5,6 +5,7 @@ output: github_document
 
 ```{r}
 library(tidyverse)
+library(ggridges)
 ```
 
 Load in a dataset that we'll use often
@@ -105,6 +106,53 @@ weather_df %>%
   ggplot(aes(x = tmin, y = tmax)) +
   geom_bin_2d() 
 ```
+
+## Univariate plots
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmax, fill = name)) +
+  geom_histogram() +
+  facet_grid(. ~ name) # get seperate histogram
+```
+
+Let's try some other plots...
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmax, fill = name)) +
+  geom_density(alpha = .3)
+
+```
+
+still with `tmax` and `name`
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+
+```
+
+some like violin plots?
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_violin()
+
+```
+
+What about rigdes...
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmax, y = name)) +
+  geom_density_ridges(alpha = .5, scale = .8) # seperate density plots
+
+```
+
+
 
 
 
