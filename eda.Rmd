@@ -1,11 +1,16 @@
 ---
-title: "Groupby and summarize"
+title: "Group by and summarize"
 output: github_document
 ---
 
 ```{r}
 library(tidyverse)
 
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
 ```
 
 Load in a dataset that we'll use often
@@ -25,6 +30,74 @@ weather_df =
       USS0023B17S = "Waterhole_WA"),
     tmin = tmin / 10,
     tmax = tmax / 10,
-    month = lubridate::floor_date(date, unit = "month")) %>% # round up date
+    month = lubridate::floor_date(date, unit = "month")) %>% # date all 01
   select(name, id, everything())
 ```
+
+## `group_by`
+
+```{r}
+weather_df %>%
+  group_by(name, month)
+```
+
+## Counting things
+
+```{r}
+weather_df %>%
+  group_by(name, month) %>%
+  summarize(n_obs = n())
+
+weather_df %>%
+  count(month, name = "n_obs") #quick way
+```
+
+It is nice that it is df. table does not work
+```{r}
+weather_df %>%
+  pull(month) %>% 
+  table
+```
+
+```{r}
+weather_df %>% 
+  janitor::tabyl(month, name)
+```
+
+## general summary
+
+count, take mean, look sd
+
+```{r}
+weather_df %>%
+  #drop_na() %>% 
+  group_by(name, month) %>%
+  summarize(
+    n_obs = n(),
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    median_tmax = median(tmax, na.rm = TRUE),
+    sd_tmax = sd(tmax, na.rm = TRUE)
+    ) %>% 
+  ggplot(aes(x = month, y = mean_tmax, color = name)) +
+  geom_point() +
+  geom_line()
+```
+
+formatting table outputs
+
+```{r}
+weather_df %>%
+  group_by(name) %>%
+  summarize(
+    n_obs = n(),
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    ) %>% 
+  knitr::kable(digits = 2)
+```
+
+
+
+
+
+
+
