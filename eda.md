@@ -196,13 +196,19 @@ weather_df %>%
 formatting table outputs
 
 ``` r
+qnorm(0.95)
+```
+
+    ## [1] 1.644854
+
+``` r
 weather_df %>%
   group_by(name) %>%
   summarize(
     n_obs = n(),
     mean_tmax = mean(tmax, na.rm = TRUE),
     ) %>% 
-  knitr::kable(digits = 2)
+  knitr::kable(digits = 2) # nice table
 ```
 
 | name            | n\_obs | mean\_tmax |
@@ -210,3 +216,97 @@ weather_df %>%
 | CentralPark\_NY |    365 |      17.37 |
 | Waikiki\_HA     |    365 |      29.66 |
 | Waterhole\_WA   |    365 |       7.48 |
+
+## Grouped `mutate`
+
+``` r
+weather_df %>%
+  group_by(name) %>%
+  mutate(
+    mean_tmax = mean(tmax, na.rm = TRUE), # add mean column
+    centered_tmax = tmax - mean_tmax) %>% 
+  ggplot(aes(x = date, y = centered_tmax, color = name)) + 
+    geom_point() 
+```
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+<img src="eda_files/figure-gfm/unnamed-chunk-9-1.png" width="90%" />
+
+``` r
+weather_df %>%
+  group_by(name) %>%
+  mutate(
+    tmax_rank = min_rank(tmax) # reverse: min_rank(desc(tmax))
+    ) %>% # coldest day
+  filter(tmax_rank < 2)
+```
+
+    ## # A tibble: 3 × 8
+    ## # Groups:   name [3]
+    ##   name           id          date        prcp  tmax  tmin month      tmax_rank
+    ##   <chr>          <chr>       <date>     <dbl> <dbl> <dbl> <date>         <int>
+    ## 1 CentralPark_NY USW00094728 2017-12-28     0  -7.7 -11.6 2017-12-01         1
+    ## 2 Waikiki_HA     USC00519397 2017-12-21    18  21.7  18.3 2017-12-01         1
+    ## 3 Waterhole_WA   USS0023B17S 2017-01-02    25 -10.5 -12.4 2017-01-01         1
+
+lagged variables
+
+``` r
+weather_df %>%
+  group_by(name) %>%
+  mutate(
+    lagged_tmax = lag(tmax, n=1), #show the tmax on the day before
+    tmax_diff = tmax - lagged_tmax
+    ) %>% 
+  summarize(
+    diff_sd = sd(tmax_diff, na.rm = TRUE)
+  )
+```
+
+    ## # A tibble: 3 × 2
+    ##   name           diff_sd
+    ##   <chr>            <dbl>
+    ## 1 CentralPark_NY    4.45
+    ## 2 Waikiki_HA        1.23
+    ## 3 Waterhole_WA      3.13
+
+## limitations
+
+what if my “summary” is a linear func
+
+``` r
+weather_df %>%
+  group_by(name) %>%
+  summarize(
+    cor_tmin_tamx = cor(tmin, tmax, use = "complete")
+  )
+```
+
+    ## # A tibble: 3 × 2
+    ##   name           cor_tmin_tamx
+    ##   <chr>                  <dbl>
+    ## 1 CentralPark_NY         0.955
+    ## 2 Waikiki_HA             0.638
+    ## 3 Waterhole_WA           0.939
+
+``` r
+weather_df %>%
+  filter(name == "CentralPark_NY") %>% 
+  lm(tmax ~ tmin, data = .)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = .)
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##       7.209        1.039
+
+``` r
+# not work
+#weather_df %>%
+  #group_by(name) %>%
+  #summarize(lm = lm(tmax ~ tmin))
+```

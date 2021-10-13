@@ -86,18 +86,74 @@ weather_df %>%
 formatting table outputs
 
 ```{r}
+qnorm(0.95)
 weather_df %>%
   group_by(name) %>%
   summarize(
     n_obs = n(),
     mean_tmax = mean(tmax, na.rm = TRUE),
     ) %>% 
-  knitr::kable(digits = 2)
+  knitr::kable(digits = 2) # nice table
+```
+
+## Grouped `mutate`
+
+```{r}
+weather_df %>%
+  group_by(name) %>%
+  mutate(
+    mean_tmax = mean(tmax, na.rm = TRUE), # add mean column
+    centered_tmax = tmax - mean_tmax) %>% 
+  ggplot(aes(x = date, y = centered_tmax, color = name)) + 
+    geom_point() 
 ```
 
 
 
 
 
+```{r}
+weather_df %>%
+  group_by(name) %>%
+  mutate(
+    tmax_rank = min_rank(tmax) # reverse: min_rank(desc(tmax))
+    ) %>% # coldest day
+  filter(tmax_rank < 2)
+
+```
+lagged variables
+
+```{r}
+weather_df %>%
+  group_by(name) %>%
+  mutate(
+    lagged_tmax = lag(tmax, n=1), #show the tmax on the day before
+    tmax_diff = tmax - lagged_tmax
+    ) %>% 
+  summarize(
+    diff_sd = sd(tmax_diff, na.rm = TRUE)
+  )
+```
+
+## limitations
+
+what if my "summary" is a linear func
+
+```{r}
+weather_df %>%
+  group_by(name) %>%
+  summarize(
+    cor_tmin_tamx = cor(tmin, tmax, use = "complete")
+  )
+
+weather_df %>%
+  filter(name == "CentralPark_NY") %>% 
+  lm(tmax ~ tmin, data = .)
+
+# not work
+#weather_df %>%
+  #group_by(name) %>%
+  #summarize(lm = lm(tmax ~ tmin))
+```
 
 
